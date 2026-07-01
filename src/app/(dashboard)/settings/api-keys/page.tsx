@@ -35,7 +35,7 @@ export default async function ApiKeysPage() {
       <div className="bg-gray-900 rounded-lg p-4 text-xs font-mono text-gray-300 space-y-1">
         <p className="text-gray-500"># トランザクションメール送信例</p>
         <p>curl -X POST https://your-domain.com/v1/transactional/send \</p>
-        <p className="pl-4">-H &apos;Authorization: Bearer sk_live_xxx&apos; \</p>
+        <p className="pl-4">-H &apos;Authorization: Bearer YOUR_API_KEY&apos; \</p>
         <p className="pl-4">-H &apos;Content-Type: application/json&apos; \</p>
         <p className="pl-4">-d &apos;&#123;&quot;to&quot;:&quot;user@example.com&quot;,&quot;subject&quot;:&quot;注文確認&quot;,&quot;template_id&quot;:&quot;...&quot;&#125;&apos;</p>
       </div>
@@ -58,7 +58,7 @@ export default async function ApiKeysPage() {
                   {k.last_used_at && ` · 最終使用: ${new Date(k.last_used_at).toLocaleDateString('ja-JP')}`}
                 </p>
               </div>
-              <span className="text-xs font-mono text-gray-400 bg-gray-50 px-2 py-1 rounded">sk_live_••••••••</span>
+              <span className="text-xs font-mono text-gray-400 bg-gray-50 px-2 py-1 rounded">••••••••••••••••</span>
               <button className="text-xs text-red-600 hover:underline">削除</button>
             </div>
           ))}
