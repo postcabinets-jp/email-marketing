@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, CheckCircle, XCircle, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { AddDomainForm, DeleteDomainButton } from './client'
 
 function StatusIcon({ status }: { status: string }) {
   if (status === 'verified') return <CheckCircle className="w-4 h-4 text-emerald-500" />
@@ -54,6 +55,7 @@ export default async function DomainsPage() {
                 {new Date(d.verified_at).toLocaleDateString('ja-JP')} 認証済
               </span>
             )}
+            <DeleteDomainButton id={d.id} domain={d.domain} />
           </div>
           <div className="grid grid-cols-3 gap-4">
             {[
@@ -92,7 +94,7 @@ export default async function DomainsPage() {
           <p>DKIM:  mail._domainkey TXT v=DKIM1; k=rsa; p=...</p>
           <p>DMARC: _dmarc TXT v=DMARC1; p=quarantine;</p>
         </div>
-        <Button size="sm" variant="outline">ドメインを追加</Button>
+        <AddDomainForm />
       </div>
     </div>
   )

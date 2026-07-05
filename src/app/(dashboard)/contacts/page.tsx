@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Plus, Upload } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { DeleteContactButton, ImportContactsButton } from './client'
 
 const statusStyles: Record<string, string> = {
   subscribed: 'bg-emerald-100 text-emerald-700',
@@ -50,9 +51,7 @@ export default async function ContactsPage() {
           <p className="text-sm text-gray-500 mt-0.5">{count?.toLocaleString() ?? 0} 件</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5">
-            <Upload className="w-3.5 h-3.5" /> CSVインポート
-          </Button>
+          <ImportContactsButton />
           <Button size="sm" className="gap-1.5" asChild>
             <Link href="/contacts/new">
               <Plus className="w-3.5 h-3.5" /> 追加
@@ -70,6 +69,7 @@ export default async function ContactsPage() {
               <th className="text-left px-4 py-2.5 font-medium text-gray-600 text-xs">ステータス</th>
               <th className="text-left px-4 py-2.5 font-medium text-gray-600 text-xs">タグ</th>
               <th className="text-left px-4 py-2.5 font-medium text-gray-600 text-xs">追加日</th>
+              <th className="w-10"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -107,12 +107,15 @@ export default async function ContactsPage() {
                   <td className="px-4 py-3 text-gray-400 text-xs">
                     {new Date(c.created_at).toLocaleDateString('ja-JP')}
                   </td>
+                  <td className="px-4 py-2">
+                    <DeleteContactButton id={c.id} email={c.email} />
+                  </td>
                 </tr>
               )
             })}
             {!contacts?.length && (
               <tr>
-                <td colSpan={5} className="px-4 py-10 text-center text-sm text-gray-400">
+                <td colSpan={6} className="px-4 py-10 text-center text-sm text-gray-400">
                   連絡先がありません。CSVインポートまたは手動追加してください。
                 </td>
               </tr>

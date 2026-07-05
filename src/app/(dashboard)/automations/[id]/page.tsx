@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { WorkflowActions } from './client'
 
 const stepTypeLabels: Record<string, string> = {
   send_email: 'メール送信', delay: '遅延', add_tag: 'タグ追加', remove_tag: 'タグ削除', webhook: 'Webhook',
@@ -62,6 +63,8 @@ export default async function AutomationDetailPage({ params }: { params: Promise
           <span className="text-xs text-gray-400 block">エンロール済</span>
         </p>
       </div>
+
+      <WorkflowActions workflowId={id} status={workflow.status} />
 
       {/* Steps */}
       <div className="bg-white rounded-lg border border-gray-200 p-5 space-y-4">

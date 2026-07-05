@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Plus, Filter } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { DeleteSegmentButton } from './client'
 
 export default async function SegmentsPage() {
   const supabase = await createClient()
@@ -57,6 +58,7 @@ export default async function SegmentsPage() {
               <span className="text-xs text-gray-400 shrink-0">
                 {new Date(s.created_at).toLocaleDateString('ja-JP')}
               </span>
+              <DeleteSegmentButton id={s.id} name={s.name} />
             </div>
           )
         })}

@@ -3,6 +3,7 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { CampaignActions } from './client'
 
 export default async function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -68,6 +69,8 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
           </Button>
         )}
       </div>
+
+      <CampaignActions campaignId={id} status={campaign.status} />
 
       {/* Stats */}
       {campaign.status === 'sent' && (

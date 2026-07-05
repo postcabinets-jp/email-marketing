@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { ContactActions } from './client'
 
 const statusLabels: Record<string, string> = {
   subscribed: '購読中', unsubscribed: '購読解除', bounced: 'バウンス', complained: 'スパム報告', pending: '確認待ち',
@@ -17,7 +18,7 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
 
   const { data: contact } = await supabase
     .from('contacts')
-    .select('*,contact_tags(tags(name,color))')
+    .select('*,contact_tags(tags(id,name,color))')
     .eq('id', id)
     .single()
 
@@ -30,7 +31,7 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
     .order('occurred_at', { ascending: false })
     .limit(20)
 
-  const tags = contact.contact_tags as unknown as Array<{ tags: { name: string; color: string | null } }>
+  const tags = contact.contact_tags as unknown as Array<{ tags: { id: string; name: string; color: string | null } }>
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -40,6 +41,9 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
         </Button>
         <h1 className="text-xl font-semibold text-gray-900">{contact.email}</h1>
         <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{statusLabels[contact.status] ?? contact.status}</span>
+        <div className="ml-auto">
+          <ContactActions contactId={id} />
+        </div>
       </div>
 
       <div className="bg-white rounded-lg border border-gray-200 p-5 space-y-4">

@@ -1,8 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Plus, Key } from 'lucide-react'
+import { ArrowLeft, Key } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { CreateApiKeyButton, DeleteApiKeyButton } from './client'
 
 export default async function ApiKeysPage() {
   const supabase = await createClient()
@@ -43,9 +44,7 @@ export default async function ApiKeysPage() {
       <div className="bg-white rounded-lg border border-gray-200">
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
           <h2 className="text-sm font-semibold text-gray-900">発行済みキー ({keys?.length ?? 0})</h2>
-          <Button size="sm" className="gap-1.5">
-            <Plus className="w-3.5 h-3.5" /> 新規発行
-          </Button>
+          <CreateApiKeyButton />
         </div>
         <div className="divide-y divide-gray-100">
           {keys?.map(k => (
@@ -59,7 +58,7 @@ export default async function ApiKeysPage() {
                 </p>
               </div>
               <span className="text-xs font-mono text-gray-400 bg-gray-50 px-2 py-1 rounded">••••••••••••••••</span>
-              <button className="text-xs text-red-600 hover:underline">削除</button>
+              <DeleteApiKeyButton id={k.id} name={k.name} />
             </div>
           ))}
           {!keys?.length && (

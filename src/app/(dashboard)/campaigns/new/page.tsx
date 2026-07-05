@@ -2,11 +2,11 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { createCampaign } from '@/app/actions/campaigns'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { createClient } from '@/lib/supabase/client'
 
 const steps = ['受信者選択', '件名・差出人', 'メール本文', '確認・送信']
 
@@ -14,6 +14,7 @@ export default function NewCampaignPage() {
   const router = useRouter()
   const [step, setStep] = useState(0)
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState({
     name: '',
     listId: '',
@@ -30,32 +31,24 @@ export default function NewCampaignPage() {
 
   async function handleSaveDraft() {
     setSaving(true)
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    setError(null)
 
-    const { data: membership } = await supabase
-      .from('memberships')
-      .select('organization_id')
-      .eq('user_id', user.id)
-      .limit(1)
-      .single()
+    const formData = new FormData()
+    formData.set('name', form.name || '無題のキャンペーン')
+    formData.set('subject', form.subject || '(件名未設定)')
+    formData.set('preview_text', form.previewText)
+    formData.set('from_name', form.fromName)
+    formData.set('from_email', form.fromEmail)
+    formData.set('html_body', form.htmlBody)
+    if (form.listId) formData.set('list_id', form.listId)
 
-    const { data, error } = await supabase.from('campaigns').insert({
-      organization_id: membership?.organization_id,
-      name: form.name || '無題のキャンペーン',
-      subject: form.subject || '(件名未設定)',
-      preview_text: form.previewText,
-      from_name: form.fromName,
-      from_email: form.fromEmail,
-      html_body: form.htmlBody,
-      list_id: form.listId || null,
-      status: 'draft',
-    }).select('id').single()
-
+    const result = await createCampaign(formData)
     setSaving(false)
-    if (!error && data) {
-      router.push(`/campaigns/${data.id}`)
+
+    if (result.success) {
+      router.push(`/campaigns/${result.data.id}`)
+    } else {
+      setError(result.error)
     }
   }
 
@@ -84,6 +77,10 @@ export default function NewCampaignPage() {
           </div>
         ))}
       </div>
+
+      {error && (
+        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">{error}</p>
+      )}
 
       {/* Step 0: Recipient selection */}
       {step === 0 && (

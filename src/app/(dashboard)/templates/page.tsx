@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Plus, FileText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { DeleteTemplateButton } from './client'
 
 export default async function TemplatesPage() {
   const supabase = await createClient()
@@ -48,7 +49,10 @@ export default async function TemplatesPage() {
               {t.preview_text && <p className="text-xs text-gray-400 mt-0.5 truncate">{t.preview_text}</p>}
               <div className="flex items-center justify-between mt-3">
                 <span className="text-xs text-gray-400">{new Date(t.updated_at).toLocaleDateString('ja-JP')}</span>
-                <Link href={`/editor/${t.id}`} className="text-xs text-blue-600 hover:underline">編集</Link>
+                <div className="flex items-center gap-3">
+                  <Link href={`/editor/${t.id}`} className="text-xs text-blue-600 hover:underline">編集</Link>
+                  {!t.is_global && <DeleteTemplateButton id={t.id} name={t.name} />}
+                </div>
               </div>
             </div>
           </div>

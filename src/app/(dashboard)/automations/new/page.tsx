@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { createWorkflow } from '@/app/actions/workflows'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -16,32 +16,28 @@ const triggerTypes = [
   { value: 'date_field', label: '日付フィールド到達時' },
   { value: 'api_trigger', label: 'APIトリガー' },
   { value: 'link_click', label: 'リンククリック時' },
-]
+] as const
+
+type TriggerType = typeof triggerTypes[number]['value']
 
 export default function NewAutomationPage() {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [name, setName] = useState('')
-  const [triggerType, setTriggerType] = useState('list_subscribe')
+  const [triggerType, setTriggerType] = useState<TriggerType>('list_subscribe')
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
-    const { data: membership } = await supabase
-      .from('memberships').select('organization_id').eq('user_id', user.id).limit(1).single()
-
-    const { data } = await supabase.from('workflows').insert({
-      organization_id: membership?.organization_id,
-      name,
-      trigger_type: triggerType,
-      status: 'draft',
-    }).select('id').single()
-
-    router.push(data ? `/automations/${data.id}` : '/automations')
+    setError(null)
+    const result = await createWorkflow({ name, trigger_type: triggerType })
+    setSaving(false)
+    if (result.success) {
+      router.push(`/automations/${result.data.id}`)
+    } else {
+      setError(result.error)
+    }
   }
 
   return (
@@ -59,13 +55,16 @@ export default function NewAutomationPage() {
         </div>
         <div>
           <Label>トリガータイプ</Label>
-          <Select value={triggerType} onValueChange={(v) => setTriggerType(v ?? 'list_subscribe')}>
+          <Select value={triggerType} onValueChange={(v) => setTriggerType((v ?? 'list_subscribe') as TriggerType)}>
             <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
             <SelectContent>
               {triggerTypes.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
+        {error && (
+          <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">{error}</p>
+        )}
         <Button type="submit" disabled={saving}>{saving ? '作成中...' : 'ワークフローを作成'}</Button>
       </form>
     </div>

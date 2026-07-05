@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { createSegment } from '@/app/actions/segments'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -34,6 +34,7 @@ export default function NewSegmentPage() {
   const [matchType, setMatchType] = useState<'all' | 'any'>('all')
   const [conditions, setConditions] = useState<Condition[]>([{ field: 'tag', op: 'has', value: '' }])
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   function addCondition() {
     setConditions(c => [...c, { field: 'tag', op: 'has', value: '' }])
@@ -50,21 +51,14 @@ export default function NewSegmentPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
-    const { data: membership } = await supabase
-      .from('memberships').select('organization_id').eq('user_id', user.id).limit(1).single()
-
-    await supabase.from('segments').insert({
-      organization_id: membership?.organization_id,
-      name,
-      conditions,
-      match_type: matchType,
-    })
-
-    router.push('/segments')
+    setError(null)
+    const result = await createSegment({ name, conditions, match_type: matchType })
+    setSaving(false)
+    if (result.success) {
+      router.push('/segments')
+    } else {
+      setError(result.error)
+    }
   }
 
   return (
@@ -122,6 +116,10 @@ export default function NewSegmentPage() {
             <Plus className="w-3.5 h-3.5" /> 条件を追加
           </Button>
         </div>
+
+        {error && (
+          <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">{error}</p>
+        )}
 
         <Button type="submit" disabled={saving}>{saving ? '作成中...' : 'セグメントを作成'}</Button>
       </form>

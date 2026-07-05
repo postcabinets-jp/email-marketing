@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Save, ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { createTemplate, updateTemplate } from '@/app/actions/templates'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -18,6 +19,7 @@ export default function EmailEditorPage() {
   const isNew = id === 'new'
 
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [name, setName] = useState('')
   const [subject, setSubject] = useState('')
   const [html, setHtml] = useState(`<!DOCTYPE html>
@@ -47,25 +49,26 @@ export default function EmailEditorPage() {
 
   async function handleSave() {
     setSaving(true)
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
-    const { data: membership } = await supabase
-      .from('memberships').select('organization_id').eq('user_id', user.id).limit(1).single()
+    setError(null)
 
     if (isNew) {
-      const { data } = await supabase.from('email_templates').insert({
-        organization_id: membership?.organization_id,
-        name: name || '無題のテンプレート',
-        subject,
-        html_body: html,
-      }).select('id').single()
+      const formData = new FormData()
+      formData.set('name', name || '無題のテンプレート')
+      formData.set('subject', subject)
+      formData.set('html_body', html)
+      const result = await createTemplate(formData)
       setSaving(false)
-      if (data) router.push(`/editor/${data.id}`)
+      if (result.success) {
+        router.push(`/editor/${result.data.id}`)
+      } else {
+        setError(result.error)
+      }
     } else {
-      await supabase.from('email_templates').update({ name, subject, html_body: html }).eq('id', id)
+      const result = await updateTemplate(id, { name, subject, html_body: html })
       setSaving(false)
+      if (!result.success) {
+        setError(result.error)
+      }
     }
   }
 
@@ -81,6 +84,10 @@ export default function EmailEditorPage() {
           <Save className="w-3.5 h-3.5" /> {saving ? '保存中...' : '保存'}
         </Button>
       </div>
+
+      {error && (
+        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2 mb-4">{error}</p>
+      )}
 
       <Tabs defaultValue="editor" className="flex-1 flex flex-col">
         <TabsList className="w-fit">

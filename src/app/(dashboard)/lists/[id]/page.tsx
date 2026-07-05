@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { ListActions, RemoveContactButton } from './client'
 
 export default async function ListDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -31,10 +32,11 @@ export default async function ListDetailPage({ params }: { params: Promise<{ id:
         <Button variant="ghost" size="sm" asChild>
           <Link href="/lists"><ArrowLeft className="w-4 h-4" /></Link>
         </Button>
-        <div>
+        <div className="flex-1">
           <h1 className="text-xl font-semibold text-gray-900">{list.name}</h1>
           <p className="text-sm text-gray-500">{count?.toLocaleString() ?? 0} 人の購読者</p>
         </div>
+        <ListActions listId={id} listName={list.name} />
       </div>
 
       <div className="bg-white rounded-lg border border-gray-200 p-5 space-y-3">
@@ -69,6 +71,7 @@ export default async function ListDetailPage({ params }: { params: Promise<{ id:
               <th className="text-left px-4 py-2 font-medium text-gray-500 text-xs">名前</th>
               <th className="text-left px-4 py-2 font-medium text-gray-500 text-xs">ステータス</th>
               <th className="text-left px-4 py-2 font-medium text-gray-500 text-xs">登録日</th>
+              <th className="w-10"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -84,6 +87,9 @@ export default async function ListDetailPage({ params }: { params: Promise<{ id:
                     <span className={`px-2 py-0.5 rounded-full text-xs ${m.status === 'subscribed' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>{m.status}</span>
                   </td>
                   <td className="px-4 py-2.5 text-gray-400 text-xs">{new Date(m.joined_at).toLocaleDateString('ja-JP')}</td>
+                  <td className="px-4 py-2">
+                    <RemoveContactButton listId={id} contactId={m.contact_id} email={c?.email} />
+                  </td>
                 </tr>
               )
             })}
