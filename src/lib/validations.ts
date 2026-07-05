@@ -98,7 +98,7 @@ export const updateContactSchema = z
       .regex(/^[\d\s+\-().]*$/, '有効な電話番号を入力してください')
       .nullish(),
     status: contactStatusSchema,
-    custom_fields: z.record(z.unknown()),
+    custom_fields: z.record(z.string(), z.unknown()),
   })
   .partial()
 
@@ -218,14 +218,14 @@ export const workflowStatusSchema = z.enum(['draft', 'active', 'paused'])
 export const createWorkflowSchema = z.object({
   name: nonEmptyString('ワークフロー名'),
   trigger_type: workflowTriggerTypeSchema,
-  trigger_config: z.record(z.unknown()).optional(),
+  trigger_config: z.record(z.string(), z.unknown()).optional(),
 })
 
 export const updateWorkflowSchema = z
   .object({
     name: nonEmptyString('ワークフロー名'),
     trigger_type: z.string(),
-    trigger_config: z.record(z.unknown()),
+    trigger_config: z.record(z.string(), z.unknown()),
   })
   .partial()
 
@@ -240,13 +240,13 @@ export const workflowStepTypeSchema = z.enum([
 export const addWorkflowStepSchema = z.object({
   workflow_id: uuid,
   step_type: workflowStepTypeSchema,
-  config: z.record(z.unknown()),
+  config: z.record(z.string(), z.unknown()),
 })
 
 export const updateWorkflowStepSchema = z
   .object({
     step_type: z.string(),
-    config: z.record(z.unknown()),
+    config: z.record(z.string(), z.unknown()),
   })
   .partial()
 
